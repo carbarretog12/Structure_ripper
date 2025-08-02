@@ -1,83 +1,44 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Inferidor de estructuras Node-RED</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Structure Ripper</title>
   <style>
     body {
-      font-family: monospace;
-      background: #1e1e1e;
-      color: #f1f1f1;
-      margin: 0;
-      padding: 20px;
+      font-family: sans-serif;
+      margin: 2rem;
+      background-color: #f4f4f4;
     }
     textarea {
       width: 100%;
-      height: 200px;
-      background: #2d2d2d;
-      color: #fff;
-      border: none;
-      padding: 10px;
+      height: 300px;
       font-family: monospace;
-      font-size: 14px;
+    }
+    #resultado {
+      white-space: pre-wrap;
+      background: #fff;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      margin-top: 1rem;
     }
     button {
-      margin-top: 10px;
-      padding: 8px 16px;
-      font-size: 14px;
-      background-color: #00aaff;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    pre {
-      background: #111;
-      padding: 10px;
-      overflow-x: auto;
-      border-radius: 4px;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
     }
   </style>
 </head>
 <body>
+  <h1>🧠 Structure Ripper para Node-RED</h1>
 
-<h2>🔎 Pegue aquí una función de Node-RED</h2>
-<textarea id="codeInput" placeholder="Pegue su función JS aquí..."></textarea>
-<br>
-<button onclick="inferStructure()">Inferir estructura</button>
+  <label for="codigo">Pega aquí el código del nodo o función:</label>
+  <textarea id="codigo" placeholder="Pega aquí el código JS del nodo..."></textarea>
 
-<h3>📦 Estructura inferida:</h3>
-<pre id="output">{}</pre>
+  <button onclick="analizar()">Analizar estructura</button>
 
-<script>
-function inferStructure() {
-    const code = document.getElementById("codeInput").value;
-    let output = {};
+  <h2>🔍 Estructura inferida:</h2>
+  <div id="resultado">Esperando código...</div>
 
-    try {
-        if (code.includes("msg.payload = extraerDatosPozos")) {
-            output["msg.payload"] = [{
-                id: "string",
-                Register: "number",
-                address: "number",
-                multiplier: "number",
-                variable: "IntPress | DisPress | IntTemp | DisTemp | XVibrati | ZVibrati",
-                well_pos: "number"
-            }];
-        } else if (code.includes("msg.payload =") && code.includes("global.get")) {
-            output["msg.payload"] = "Estructura derivada desde global.get(...)";
-        } else {
-            output = {
-                mensaje: "No se pudo inferir una estructura específica. Asegúrate de usar una función reconocible como extraerDatosPozos o estructuras similares."
-            };
-        }
-
-        document.getElementById("output").textContent = JSON.stringify(output, null, 2);
-    } catch (e) {
-        document.getElementById("output").textContent = "Error al analizar el código.";
-    }
-}
-</script>
-
+  <script src="analizador.js"></script>
 </body>
 </html>
