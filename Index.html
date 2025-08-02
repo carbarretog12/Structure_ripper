@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inferidor de estructuras Node-RED</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #1e1e1e;
+      color: #f1f1f1;
+      margin: 0;
+      padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      background: #2d2d2d;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #00aaff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    pre {
+      background: #111;
+      padding: 10px;
+      overflow-x: auto;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🔎 Pegue aquí una función de Node-RED</h2>
+<textarea id="codeInput" placeholder="Pegue su función JS aquí..."></textarea>
+<br>
+<button onclick="inferStructure()">Inferir estructura</button>
+
+<h3>📦 Estructura inferida:</h3>
+<pre id="output">{}</pre>
+
+<script>
+function inferStructure() {
+    const code = document.getElementById("codeInput").value;
+    let output = {};
+
+    try {
+        if (code.includes("msg.payload = extraerDatosPozos")) {
+            output["msg.payload"] = [{
+                id: "string",
+                Register: "number",
+                address: "number",
+                multiplier: "number",
+                variable: "IntPress | DisPress | IntTemp | DisTemp | XVibrati | ZVibrati",
+                well_pos: "number"
+            }];
+        } else if (code.includes("msg.payload =") && code.includes("global.get")) {
+            output["msg.payload"] = "Estructura derivada desde global.get(...)";
+        } else {
+            output = {
+                mensaje: "No se pudo inferir una estructura específica. Asegúrate de usar una función reconocible como extraerDatosPozos o estructuras similares."
+            };
+        }
+
+        document.getElementById("output").textContent = JSON.stringify(output, null, 2);
+    } catch (e) {
+        document.getElementById("output").textContent = "Error al analizar el código.";
+    }
+}
+</script>
+
+</body>
+</html>

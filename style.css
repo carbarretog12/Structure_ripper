@@ -1,0 +1,11 @@
+body {
+  font-family: sans-serif;
+  padding: 2rem;
+}
+textarea {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+button {
+  padding: 0.5rem 1rem;
+}
