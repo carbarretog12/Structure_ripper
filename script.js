@@ -1,62 +1,54 @@
-// infer.js
-// Analizador que infiere estructuras en msg, context, flow, global y funciones dinámicas
+function analizar() {
+  const codigo = document.getElementById('codigo').value;
+  const resultado = document.getElementById('resultado');
 
-function inferType(value) {
-    if (Array.isArray(value)) {
-        const itemTypes = value.map(inferType);
-        return { type: "array", items: itemTypes };
+  try {
+    const estructuras = inferirEstructuras(codigo);
+    resultado.textContent = JSON.stringify(estructuras, null, 2);
+  } catch (e) {
+    resultado.textContent = '❌ Error al analizar el código:\n' + e.message;
+  }
+}
+
+function inferirEstructuras(codigo) {
+  const estructuras = {
+    msg: new Set(),
+    context: new Set(),
+    flow: new Set(),
+    global: new Set()
+  };
+
+  const lineas = codigo.split('\n');
+
+  for (const linea of lineas) {
+    const trimmed = linea.trim();
+
+    if (/msg\./.test(trimmed)) {
+      const propiedades = [...trimmed.matchAll(/msg\.([a-zA-Z0-9_]+)/g)];
+      propiedades.forEach(p => estructuras.msg.add(p[1]));
     }
-    if (value === null) return { type: "null" };
-    if (typeof value === "object") {
-        const props = {};
-        for (const key in value) {
-            props[key] = inferType(value[key]);
-        }
-        return { type: "object", properties: props };
+
+    if (/context\./.test(trimmed)) {
+      const propiedades = [...trimmed.matchAll(/context\.([a-zA-Z0-9_]+)/g)];
+      propiedades.forEach(p => estructuras.context.add(p[1]));
     }
-    return { type: typeof value };
-}
 
-function simulateContext() {
-    return {
-        get: (key) => ({ ejemplo: true, timestamp: Date.now() }),
-        set: () => {},
-    };
-}
-
-function evaluateCode(code) {
-    const context = simulateContext();
-    const globalContext = simulateContext();
-    const flowContext = simulateContext();
-
-    const consoleMessages = [];
-    const console = { log: (...args) => consoleMessages.push(args.join(" ")) };
-
-    let msg = {};
-
-    try {
-        const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-        const wrapped = new AsyncFunction("msg", "context", "flow", "global", "console", code);
-        const result = wrapped(msg, context, flowContext, globalContext, console);
-        return Promise.resolve(result).then((finalMsg) => {
-            return {
-                payload: inferType(finalMsg.payload),
-                msg: inferType(finalMsg),
-                logs: consoleMessages
-            };
-        });
-    } catch (err) {
-        return Promise.resolve({ error: err.message });
+    if (/flow\./.test(trimmed)) {
+      const propiedades = [...trimmed.matchAll(/flow\.([a-zA-Z0-9_]+)/g)];
+      propiedades.forEach(p => estructuras.flow.add(p[1]));
     }
+
+    if (/global\./.test(trimmed)) {
+      const propiedades = [...trimmed.matchAll(/global\.([a-zA-Z0-9_]+)/g)];
+      propiedades.forEach(p => estructuras.global.add(p[1]));
+    }
+  }
+
+  // Convierte los sets a arrays para que se puedan mostrar
+  return {
+    msg: Array.from(estructuras.msg),
+    context: Array.from(estructuras.context),
+    flow: Array.from(estructuras.flow),
+    global: Array.from(estructuras.global)
+  };
 }
-
-async function analyze() {
-    const editor = document.getElementById("code");
-    const output = document.getElementById("output");
-    const code = editor.value;
-    const result = await evaluateCode(code);
-
-    output.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
-}
-
-document.getElementById("analyze").addEventListener("click", analyze);
